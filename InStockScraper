@@ -1,0 +1,37 @@
+import requests
+from bs4 import BeautifulSoup
+import smtplib
+import time
+# place the URL of the product your willing to  check if its in stock or not
+URL = 'https://www.amazon.in/Mi-32GB-2GB-Matte-Black/dp/B07W31BP8X/ref=sr_1_4?keywords=redmi+7a&qid=1566227310&s=gateway&sr=8-4'
+
+# place your useragent
+header ={"User-Agent":
+'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/76.0.3809.100 Safari/537.36'
+}
+def checkavail() :
+  page = requests.get(URL, headers=header)
+  soup = BeautifulSoup(page.content, 'html.parser')
+  title = soup.find(id="productTitle").get_text()
+  stock = soup.find(id="availability").get_text()
+  availability = stock.strip()
+  Name = title.strip()
+  if availability == 'In stock.':
+    sendemail(Name)
+def sendemail(Name) -> object:
+  product=Name
+  server=smtplib.SMTP('smtp.gmail.com',587)
+  server.ehlo()
+  server.starttls()
+  server.ehlo()
+  server.login('from@gmail.com','password')
+  subject = 'Your Product is Now in Stock!! YOU GRAB IT!!'
+  body = 'Visit:https://www.amazon.in/Mi-32GB-2GB-Matte-Black/dp/B07W31BP8X/ref=sr_1_4?keywords=redmi+7a&qid=1566227310&s=gateway&sr=8-4'
+  msg= f"Subject:{product}{subject}\n\n{body}"
+  server.sendmail(
+'from@gmail.com','to@gmail.com',msg)
+  print('Email Send')
+  server.quit()
+while(True):
+  checkavail()
+  time.sleep(60*60) #settimer as you wish i have set it to 1 hour ie our program will check if the product is available every hour
